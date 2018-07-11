@@ -6,7 +6,7 @@ fuel_type = "solar"
 r0_ = np.array((150e9, 0))
 v0_ = np.array((0, 29780))
 n = 20
-
+indeksi = np.array([0, 1, 2, 3, 4, 5, 6])
 # astronomska jedinica -> metri
 au = 149597870700
 

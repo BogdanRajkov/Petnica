@@ -4,7 +4,7 @@ from math import pi
 import numpy as np
 import math
 import time
-from podaci import r0_, v0_, n
+from podaci import au, r0_, v0_, n
 import simulacija_pogon
 import prvi
 # import podaci
@@ -72,14 +72,15 @@ def pakovanje(matrica, chebdeg):
 
 # uglovi = np.zeros(1000)
 uglovi = np.ones(n) * pi
+snaga = np.random.random_integers(0, 1, n)
 y_max = 1
 
 start = time.process_time()
-_r, _v, _step = simulacija_pogon.simulacija(r0_, v0_, (4e2, 0), uglovi, y_max)
+_r, _v, _step = simulacija_pogon.simulacija(r0_, v0_, (3e2, 150), uglovi, snaga, y_max)
 # _b = simulacija_pogon.simulacija(r0_, v0_, (4e2, 20), np.zeros(1000), 1000)
 # _c = prvi.simulacija(150e9, 0, 0, 29780, podaci.grav_par[0], 1000)
 print(time.process_time() - start)
-plt.plot(_r[:, 0], _r[:, 1])
+plt.plot(_r[:, 0]/au, _r[:, 1]/au)
 # plt.plot(_b[:, 0], _b[:, 1])
 # plt.plot(_c[0], _c[1])
 plt.axis('equal')
