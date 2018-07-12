@@ -75,3 +75,12 @@ rmax = 20  # za sad nasumicne vrednosti
 rmin = 30  # za sad nasumicne vrednosti
 
 # # # # # # # # # # # # #
+
+# FITNES FUNKCIJA
+
+max_dist = np.array([1e8])
+min_dist = np.array([6e6])
+r_maks = np.array([10.0])
+r_min = np.array([20])
+
+# # # # # # # # # # # # #
