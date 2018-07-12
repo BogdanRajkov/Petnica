@@ -2,14 +2,15 @@ from numpy.polynomial.chebyshev import chebfit, chebval
 import matplotlib.pyplot as plt
 from math import pi
 import numpy as np
-import math
 import time
 from podaci import au, r0_, v0_, n
 import simulacija_pogon
 import prvi
-# import podaci
 # import genetski_algoritam
+import podaci
 # import drugi
+# import math
+# import timeit
 
 
 def crtanje_planeta():
@@ -19,7 +20,7 @@ def crtanje_planeta():
     x = [[] for _ in range(broj_planeta)]
     y = [[] for _ in range(broj_planeta)]
     e_prev = [2.0 for _ in range(broj_planeta)]
-    indeksi_planeta = [0, 1, 2, 3]  # indeksi planeta koje crtamo
+    indeksi_planeta = [1, 2, 3, 4]  # indeksi planeta koje crtamo
     for i in range(broj_tacaka):
         for j in range(broj_planeta):  # koliko planeta crtamo
             rez = prvi.polozaj_planeta(indeksi_planeta[j], t[i], e_prev[j])
@@ -38,20 +39,20 @@ def crtanje_planeta():
     plt.title('Putanje Merkura, Venere, Zemlje i Marsa oko Sunca')
     plt.xlabel('x koord [astronomska jedinica]')
     plt.ylabel('y koord [astronomska jedinica]')
-    # plt.show()
+    plt.show()
 
 
 def x_osa(a):
     return np.arange(a)
 
 
-def inicijalizacija(n, br_segm, chebdeg):
-    uglovi_matrica = np.multiply(np.random.random_sample((n, br_segm)), 2 * pi)
+def inicijalizacija(br_jed, br_segm, chebdeg):
+    uglovi_matrica = np.multiply(np.random.random_sample((br_jed, br_segm)), 2 * pi)
     print(uglovi_matrica)
     koeficijenti = np.array([chebfit(x_osa(br_segm), _, chebdeg) for _ in uglovi_matrica])
     temp = np.array([chebval(x_osa(br_segm), cheb) for cheb in koeficijenti])
     print(np.divide(temp, uglovi_matrica))
-    snaga = np.random.random_integers(0, 1, (n, br_segm))
+    snaga = np.random.random_integers(0, 1, (br_jed, br_segm))
     return koeficijenti, snaga
 
 
@@ -72,16 +73,23 @@ def pakovanje(matrica, chebdeg):
 
 # uglovi = np.zeros(1000)
 uglovi = np.ones(n) * pi
-snaga = np.random.random_integers(0, 1, n)
-y_max = 1
+rand_snaga = np.random.random_integers(0, 1, n)
+y_max = 1.0
 
 start = time.process_time()
-_r, _v, _step = simulacija_pogon.simulacija(r0_, v0_, (3e2, 150), uglovi, snaga, y_max)
+_r, _v, _step = simulacija_pogon.simulacija(r0_, v0_, (3e2, 0), uglovi, rand_snaga, y_max)
 # _b = simulacija_pogon.simulacija(r0_, v0_, (4e2, 20), np.zeros(1000), 1000)
 # _c = prvi.simulacija(150e9, 0, 0, 29780, podaci.grav_par[0], 1000)
-print(time.process_time() - start)
+print("ukupno: ", (time.process_time() - start)/10)
+print("polozaj: ", podaci.trajanje)
+print(_r.shape)
+print(_r[730])
+# print("polozaji: ", _r)
 plt.plot(_r[:, 0]/au, _r[:, 1]/au)
 # plt.plot(_b[:, 0], _b[:, 1])
 # plt.plot(_c[0], _c[1])
 plt.axis('equal')
 plt.show()
+# crtanje_planeta()
+
+

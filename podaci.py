@@ -1,18 +1,27 @@
 import numpy as np
+import datetime
+from jplephem.spk import SPK
 
 # promenljive
 
 fuel_type = "solar"
-r0_ = np.array((150e9, 0))
-v0_ = np.array((0, 29780))
+r0_ = np.array((300e9, 0))
+v0_ = np.array((0, 2978))
 n = 20
-indeksi = np.array([0, 1, 2, 3, 4, 5, 6])
+trajanje = 0.0
+beg_of_time = datetime.datetime(2000, 1, 1, 0, 0, 0)  # pocetak vremena
+kernel = SPK.open('D:/Downloads/de432s.bsp')
+
+# indeksi = np.array([0])
+indeksi = np.array([0, 2, 3, 4, 5, 6, 7])
 # astronomska jedinica -> metri
 au = 149597870700
 
 # gravitacioni parametri
-grav_par = [1.327124400189e20, 2.20329e13, 3.248599e14, 3.9860044188e14, 4.90486959e12, 4.2828372e13, 6.26325e10,
+grav_par = [1.327124400189e20, 2.20329e13, 3.248599e14, 3.9860044188e14, 4.2828372e13,
             1.266865349e17, 3.79311879e16, 5.7939399e15, 6.8365299e15, 8.719e11]
+
+planet_radii = np.array([6.96342e8, 2.4397e6, 6.0518e6, 6.371e6, 3.3895e6, 6.9911e7, 5.8232e7, 2.5362e7, 2.4622e7])
 
 # podaci potrebni za racunanje pozicije planete po formulama. imas formule u jednom pdf - u na drajvu.
 # redosled podataka je:
@@ -22,7 +31,7 @@ grav_par = [1.327124400189e20, 2.20329e13, 3.248599e14, 3.9860044188e14, 4.90486
 # L - srednja longituda i promena po veku
 # malo teta - longtituda perihela i promena po veku
 # Teta - longtitude of ascending node i promena po veku
-info = [(),
+info = [(0, 0, 0, 0, 0, 0, 0),
         (0.38709927,   0.00000037, 0.20563593,  0.00001906, 252.25032350, 149472.67411175,  77.45779628),
         (0.72333566,   0.00000390, 0.00677672, -0.00004107, 181.97909950,  58517.81538729, 131.60246718),
         (1.00000261,   0.00000562, 0.01671123, -0.00004392, 100.46457166,  35999.37244981, 102.93768193),
