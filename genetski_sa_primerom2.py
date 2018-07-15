@@ -1,14 +1,8 @@
-
-# import numpy as np
-# from numpy import array as uNiz
-# import matplotlib.pyplot as plt
 from numpy import random
-# import scipy
+import podaci
 import time
 
-n = 150
-chromosome_len = 600
-pop = [[random.random_integers(0, 1, chromosome_len), random.random_sample()] for i in range(n)]
+pop = [[random.random_integers(0, 1, podaci.chromosome_len), random.random_sample()] for i in range(podaci.pop_size)]
 # print(len(pop[0][0]))
 
 
@@ -99,7 +93,7 @@ def selekcija(populacija):  # vrsi selekciju. promesa listu nasumicno, daje da s
     return tournament1 + tournament2
 
 
-# def genetski_algoritam (populacija,n,max_gen,gen):
+# def genetski_algoritam (populacija,podaci.pop_size,max_gen,gen):
 
 
 def kros_over(kod1, kod2, br_jed):  # svaki bit novog koda generise izborom bita jednog od roditelja.
@@ -115,7 +109,7 @@ def kros_over(kod1, kod2, br_jed):  # svaki bit novog koda generise izborom bita
 def ukrstanje_parova(populacija, parovi, br_jed):    # dvaput ukrsta svaki par da bi populacija dece
                                     #  imala isti broj clanova kao populacija roditelja
     potomstvo = []
-    m = chromosome_len
+    m = podaci.chromosome_len
 
     for i in range(br_jed):
         potomstvo.append([kros_over(populacija[parovi[i][0]][0], populacija[parovi[i][1]][0], m)])
