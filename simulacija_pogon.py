@@ -6,12 +6,12 @@ import math
 
 from podaci import indeksi, au  # , kernel
 from newton import newton
+import interpolate
 import podaci
 import motor
 
 # from numba import jit, float64, int32
 # from scipy.optimize import newton
-# import interpolate
 # import time as tm
 # import jplephem
 # import julian
@@ -34,11 +34,8 @@ def izbacivanje(days, masa_broda):
     v_zemlja_ = np.array([x_prime, y_prime])
     # print(modulo(v_zemlja_))
     v_zemlja = modulo(v_zemlja_)
-    # v_inf = interpolate.numpy_interpol(masa_broda)
-    # v_inf = 10
-    # v_brod = math.sqrt(v_inf**2 + 2*podaci.grav_par[3]/podaci.r_parking)
-    v_brod = math.sqrt(2 * podaci.grav_par[3] / podaci.r_parking)
-    # print()
+    v_inf = interpolate.numpy_interpol(masa_broda)
+    v_brod = math.sqrt(v_inf**2 + 2*podaci.grav_par[3]/podaci.r_parking)
     r_brod_ = r_zemlja_/r_zemlja * (r_zemlja + podaci.r_parking)
     # print(modulo(r_brod_))
     v_brod_ = v_zemlja_ * (1 + v_brod/v_zemlja)
@@ -71,7 +68,7 @@ def runge_kuta4(r_, v_, t, brod, ugao, step, motor_uklj, snaga):
 
 
 # @jit(float64[3](int32, float64), nopython=True, cache=True)
-def polozaj_planeta(index, t, r_speed=False, matrica=True):  # kao sadasnjost se racuna godina 2000.
+def polozaj_planeta(index, t, r_speed=False, matrica=False):  # kao sadasnjost se racuna godina 2000.
     if index == 0:
         return np.array([0.0, 0.0, 0.0])
 
@@ -81,7 +78,7 @@ def polozaj_planeta(index, t, r_speed=False, matrica=True):  # kao sadasnjost se
             f = open('polozaji_planeta.txt', 'r+b')
             podaci.polozaji_matrica = pickle.load(f)
         offset = dt.timedelta(seconds=t)
-        offset = dt.date(2000, 1, 1) + offset - dt.date(2015, 1, 1)
+        offset = dt.date(2000, 1, 1) + offset - dt.date(2018, 1, 1)
         (x1, y1) = podaci.polozaji_matrica[offset.days][index]
         (x2, y2) = podaci.polozaji_matrica[offset.days + 1][index]
         return np.array((x1 * (3600 * 24 - offset.seconds) / (3600 * 24) + x2 * offset.seconds / (3600 * 24),
@@ -208,7 +205,7 @@ def simulacija(days, brod, uglovi, snaga, y_max):
 
         if step > 0.15 * curr_dist[0] / v:
             step = 0.15 * curr_dist[0] / v
-            print('blizu neke planete ', modulo(r_)/podaci.au, curr_dist[0], curr_dist[1])
+            # print('blizu neke planete ', modulo(r_)/podaci.au, curr_dist[0], curr_dist[1])
 
         if podaci.crashed:
             print('crash')

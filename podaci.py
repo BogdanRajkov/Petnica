@@ -8,10 +8,13 @@ import math
 # PROMENLJIVE KOJE SE MOGU VARIRATI
 
 fuel_type = "solar"
+dry_mass = 2400
+max_fuel_mass = 600
+max_time_span = 1000
 broj_segmenata = 20
-broj_jedinki = 6
+broj_jedinki = 1
 broj_gen = 1
-y_max = 6
+y_max = 2.5
 chebdeg = 4
 destination = np.array([4])
 
@@ -21,7 +24,7 @@ destination = np.array([4])
 # kernel = SPK.open('D:/Downloads/de432s.bsp')
 beg_of_time = datetime.date(2000, 1, 1)  # pocetak vremena
 planet_radii = np.array([6.96342e8, 2.4397e6, 6.0518e6, 6.371e6, 3.3895e6, 6.9911e7, 5.8232e7, 2.5362e7, 2.4622e7])
-r_parking = 1e5 + planet_radii[3]  # poluprecnik "parking" orbite - u njoj se nalazi brod pre lansiranja
+r_parking = 5e5 + planet_radii[3]  # poluprecnik "parking" orbite - u njoj se nalazi brod pre lansiranja
 indeksi = np.array([0, 2, 3, 4, 5, 6, 7])  # planete cija se gravitacija uracunava
 au = 149597870700  # astronomska jedinica u metrima
 grav_par = [1.327124400189e20, 2.20329e13, 3.248599e14, 3.9860044188e14, 4.2828372e13,  # gravitaconi parametri

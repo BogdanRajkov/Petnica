@@ -1,8 +1,9 @@
 from numpy import random
 import numpy as np
-import time
 
 import podaci
+
+# import time
 
 
 def fitnes(min_dist):
@@ -124,9 +125,9 @@ def genetski_algoritam(populacija, p_elit, p_mut):
     return np.concatenate((populacija, fitness), axis=1)
 
 
-if __name__ == "__main__":
-    pop = [[random.random_integers(0, 1, podaci.chromosome_len),
-            random.random_sample()] for i in range(podaci.pop_size)]
-    t = time.process_time()
-    genetski_algoritam(pop, 0.05, 0.03)
-    print(time.process_time() - t)
+# if __name__ == "__main__":
+#    pop = [[random.random_integers(0, 1, podaci.chromosome_len),
+#            random.random_sample()] for i in range(podaci.pop_size)]
+#    t = time.process_time()
+#    genetski_algoritam(pop, 0.05, 0.03)
+#    print(time.process_time() - t)
