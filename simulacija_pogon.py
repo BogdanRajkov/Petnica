@@ -6,12 +6,12 @@ import math
 
 from podaci import indeksi, au  # , kernel
 from newton import newton
-import interpolate
 import podaci
 import motor
 
 # from numba import jit, float64, int32
 # from scipy.optimize import newton
+# import interpolate
 # import time as tm
 # import jplephem
 # import julian
@@ -34,8 +34,11 @@ def izbacivanje(days, masa_broda):
     v_zemlja_ = np.array([x_prime, y_prime])
     # print(modulo(v_zemlja_))
     v_zemlja = modulo(v_zemlja_)
-    v_inf = interpolate.numpy_interpol(masa_broda)
-    v_brod = math.sqrt(v_inf**2 + 2*podaci.grav_par[3]/podaci.r_parking)
+    # v_inf = interpolate.numpy_interpol(masa_broda)
+    # v_inf = 10
+    # v_brod = math.sqrt(v_inf**2 + 2*podaci.grav_par[3]/podaci.r_parking)
+    v_brod = math.sqrt(2 * podaci.grav_par[3] / podaci.r_parking)
+    # print()
     r_brod_ = r_zemlja_/r_zemlja * (r_zemlja + podaci.r_parking)
     # print(modulo(r_brod_))
     v_brod_ = v_zemlja_ * (1 + v_brod/v_zemlja)

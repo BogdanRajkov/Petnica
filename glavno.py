@@ -49,8 +49,8 @@ def x_osa(a):
 
 def pop_init():
     rand_days = np.random.random_integers(365, size=broj_jedinki)
-    brod = np.array((np.random.random_sample(broj_jedinki) * 500,
-                     np.random.random_sample(broj_jedinki) * 100)).T
+    brod = np.array((np.random.random_sample(broj_jedinki) * 1200,
+                     np.random.random_sample(broj_jedinki) * 700)).T
     # rand_date = np.empty(broj_jedinki)
     # for i in range(broj_jedinki):
     #    rand_date[i] = datetime.date(0, 0, rand_days[i])
@@ -92,6 +92,8 @@ def main():
         for j in range(broj_jedinki):
             # print(j)
             _r, _, _, min_dist_dest = simulacija_pogon.simulacija(days[j], brod[j], uglovi[j], snaga[j], y_max)
+            # _r, _, _, min_dist_dest = simulacija_pogon.simulacija(days[j], brod[j],
+            #                                                      np.zeros(broj_segmenata), snaga[j], y_max)
             # if pop_fit[j] == -1:
             pop_fit[j] = fitnes(min_dist_dest)
             koeficijenti[j] = chebfit(x_osa(broj_segmenata), uglovi[j], podaci.chebdeg)

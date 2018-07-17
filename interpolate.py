@@ -1,5 +1,5 @@
 import numpy as np
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # from scipy.interpolate import interp1d
 
 v_inf = np.array([0.0024449877750618576e3, 0.3023634881825612e3, 0.8109209453952739e3, 1.410757946210269e3,
@@ -29,3 +29,8 @@ def numpy_interpol(masa_broda):
     # plt.show()
     poly = np.poly1d(np.polyfit(mass, v_inf, 4))
     return poly(masa_broda)
+
+
+if __name__ == '__main__':
+    plt.plot(mass, v_inf)
+    plt.show()
