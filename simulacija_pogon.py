@@ -76,7 +76,10 @@ def polozaj_planeta(index, t, r_speed=False, matrica=False):  # kao sadasnjost s
         if not podaci.polozaji_ucitani:
             podaci.polozaji_ucitani = True
             f = open('polozaji_planeta.txt', 'r+b')
+            podaci.beg_date = pickle.load(f)
+            podaci.years_saved = pickle.load(f)
             podaci.polozaji_matrica = pickle.load(f)
+            f.close()
         offset = dt.timedelta(seconds=t)
         offset = dt.date(2000, 1, 1) + offset - dt.date(2018, 1, 1)
         (x1, y1) = podaci.polozaji_matrica[offset.days][index]

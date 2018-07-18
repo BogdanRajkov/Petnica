@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from math import pi
 import numpy as np
 
-from podaci import broj_segmenata, broj_jedinki, broj_gen, y_max,dry_mass,max_fuel_mass,max_time_span  # , au
+from podaci import broj_segmenata, broj_jedinki, broj_gen, y_max, dry_mass, max_fuel_mass, max_time_span  # , au
 from genetski_algoritam import fitnes
 import genetski_algoritam
 import simulacija_pogon
@@ -50,8 +50,8 @@ def x_osa(a):
 
 def pop_init():
     rand_days = np.random.random_integers(max_time_span, size=broj_jedinki)
-    #rand_days  = np.array([7])
-    #brod = np.array(([4000.0],[0.0])).T
+    # rand_days  = np.array([7])
+    # brod = np.array(([4000.0],[0.0])).T
     brod = np.array((np.ones(broj_jedinki) * dry_mass,
                      np.random.random_sample(broj_jedinki) * max_fuel_mass)).T
     # rand_date = np.empty(broj_jedinki)
@@ -92,19 +92,19 @@ def bit_to_float(matrica_bit):
 def main():
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
-    if rank==0:
-        n = comm.Get_size()
+    n = comm.Get_size()
+    if rank == 0:
         days, brod, uglovi, snaga = pop_init()
         pop_fit = np.empty(broj_jedinki)
         koeficijenti = np.empty((broj_jedinki, podaci.chebdeg + 1))
         for i in range(broj_gen):
             for j in range(broj_jedinki):
-                ID = comm.recv(source=MPI.ANY_SOURCE,tag = 1)
-                comm.send ((j,days[j], brod[j], uglovi[j], snaga[j], y_max), dest = ID)
+                ID = comm.recv(source=MPI.ANY_SOURCE, tag=1)
+                comm.send((j, days[j], brod[j], uglovi[j], snaga[j], y_max), dest=ID)
             waiting = n
-            while waiting>0:
-                data = comm.recv(source=MPI.ANY_SOURCE,tag = 2);
-                (j,r_,_,_,min_dist_dest) = data 
+            while waiting > 0:
+                data = comm.recv(source=MPI.ANY_SOURCE, tag=2)
+                (j, r_, _, _, min_dist_dest) = data
                 pop_fit[j] = fitnes(min_dist_dest)
                 koeficijenti[j] = chebfit(x_osa(broj_segmenata), uglovi[j], podaci.chebdeg)
                 waiting = waiting-1
@@ -112,19 +112,19 @@ def main():
             # print(pop_bit)
             pop_bit_new = genetski_algoritam.genetski_algoritam(pop_bit, podaci.p_elit, podaci.p_mut)
             days, brod, uglovi, snaga, pop_fit = bit_to_float(pop_bit_new)
-    for i in range (1,n):              
-        ID = comm.recv(source=MPI.ANY_SOURCE);
-        comm.send(-1, dest = ID);
+        for i in range(1, n):
+            ID = comm.recv(source=MPI.ANY_SOURCE)
+            comm.send(-1, dest=ID)
     else:
         while True:
-            comm.send (comm.Get_rank(),dest=0,tag = 1);
-            data = comm.recv(source=0);
-            if (data!=-1):
+            comm.send(comm.Get_rank(), dest=0, tag=1)
+            data = comm.recv(source=0)
+            if data != -1:
                 _r, _v, _step, min_dist_dest = simulacija_pogon.simulacija(data[1], data[2], data[3], data[4], data[5])
-                comm.send(j,_r,_v,_step,min_dist_dest,dest = 0,tag =2)
+                comm.send((data[0], _r, _v, _step, min_dist_dest), dest=0, tag=2)
             else:
-                print('Proc ' + str(comm.Get_rank()) + ' logs out');
-                break;
+                print('Proc ' + str(comm.Get_rank()) + ' logs out')
+                break
 
 
 if __name__ == "__main__":

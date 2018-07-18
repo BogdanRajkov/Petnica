@@ -5,8 +5,9 @@ import numpy as np
 import pickle
 import math
 
-planets_position = np.empty((math.floor(10*365.25), 8, 2))
 date = dt.date(2015, 1, 1)
+years = 10
+planets_position = np.empty((math.floor(years*365.25), 8, 2))
 
 for i in range(planets_position.shape[0]):
     for j in range(8):
@@ -14,4 +15,6 @@ for i in range(planets_position.shape[0]):
     date = date + dt.timedelta(days=1)
 
 f = open('polozaji_planeta.txt', 'w+b')
+pickle.dump(date, f)
+pickle.dump(years, f)
 pickle.dump(planets_position, f)

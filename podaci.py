@@ -12,7 +12,7 @@ dry_mass = 2400
 max_fuel_mass = 600
 max_time_span = 1000
 broj_segmenata = 20
-broj_jedinki = 1
+broj_jedinki = 20
 broj_gen = 1
 y_max = 2.5
 chebdeg = 4
@@ -31,7 +31,9 @@ grav_par = [1.327124400189e20, 2.20329e13, 3.248599e14, 3.9860044188e14, 4.28283
             1.266865349e17, 3.79311879e16, 5.7939399e15, 6.8365299e15, 8.719e11]
 trajanje = 0.0
 crashed = False
+
 polozaji_ucitani = False
+beg_date, years_saved = 0, 0
 polozaji_matrica = np.empty((math.floor(10*365.25), 8, 2))
 
 # podaci potrebni za racunanje pozicije planete po formulama

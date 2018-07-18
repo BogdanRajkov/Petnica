@@ -15,7 +15,11 @@ import podaci
 # import math
 
 
-def crtanje_planeta(y_max, plot=True):
+def x_osa(a):
+    return np.linspace(0, 1, a)
+
+
+def crtanje_planeta(plot=True):
     broj_tacaka = int(y_max*365*2)
     broj_planeta = 5
     t = np.linspace(0, y_max*365*24*3600, broj_tacaka)
@@ -41,10 +45,6 @@ def crtanje_planeta(y_max, plot=True):
         plt.show()
     else:
         return x, y
-
-
-def x_osa(a):
-    return np.arange(a)
 
 
 def pop_init():
@@ -98,7 +98,7 @@ def main():
             pop_fit[j] = fitnes(min_dist_dest)
             koeficijenti[j] = chebfit(x_osa(broj_segmenata), uglovi[j], podaci.chebdeg)
             if True:
-                x, y = crtanje_planeta(y_max, plot=False)
+                x, y = crtanje_planeta(plot=False)
                 plt.plot(x[0], y[0], 'g',
                          x[1], y[1], 'y',
                          x[2], y[2], 'b--',
