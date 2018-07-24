@@ -14,19 +14,24 @@ def fitnes(min_dist):
     nule = np.zeros(length)
     maks = np.maximum(nule, _gmaks)
     mini = np.maximum(nule, _gmin)
+    print('Days since launch: ', _t / (3600 * 24))
+    print('Min Dist Dest: [in 1000 km]', _dist / 1e6)
+    print('Fitness: ', np.amax(_t) + np.multiply(podaci.r_maks, maks) + np.multiply(podaci.r_min, mini))
     return np.amax(_t) + np.multiply(podaci.r_maks, maks) + np.multiply(podaci.r_min, mini)
 
 
-def elitizam(populacija, p_elit):  # populacija je lista koja cuva podatke za sve jedinke u populaciji.
+def elitizam(populacija, pop_elita, p_elit):  # populacija je lista koja cuva podatke za sve jedinke u populaciji.
     #  svaka jedinka ima binarni kod (predstavljen nizom 0 i 1) i
     # vrednost fitnes funkcije
     br_jed = len(populacija)  # elitizam bira procenat najboljih u populaciji i njima menja isti procenat najgorih
-    m = int(round(p_elit * br_jed))
-    populacija = np.array(sorted(populacija, key=lambda x: x[1], reverse=True))
+    m = 1  # int(round(p_elit * br_jed))
+    populacija = np.array(sorted(populacija, key=lambda x: x[-1]))
 
-    populacija = populacija[:br_jed - m]
-    populacija = np.concatenate((populacija, populacija[:m]))
-    return populacija
+    if pop_elita is not None:
+        populacija = np.concatenate((populacija[:br_jed-m], pop_elita), axis=0)
+    populacija = np.array(sorted(populacija, key=lambda x: x[-1]))
+    pop_elita = populacija[:m]
+    return populacija, pop_elita
 
 
 # turnir je vrsenje prirodne selekcije. u svakom paru koji se takmici pobedjuje
@@ -34,7 +39,7 @@ def tournament(populacija, fitness, lista_parova, br_jed):
     #  najbolji. imas objasnjen geneticki algoritam u predlogu projekta.
     pobednici = []
     for i in range(br_jed):
-        if fitness[lista_parova[i][0]] > fitness[lista_parova[i][1]]:
+        if fitness[lista_parova[i][0]] < fitness[lista_parova[i][1]]:
             pobednici.append(populacija[lista_parova[i][0]])
         else:
             pobednici.append(populacija[lista_parova[i][1]])
@@ -67,13 +72,15 @@ def selekcija(populacija, fitness):
 
 
 def kros_over(kod1, kod2, br_jed):  # svaki bit novog koda generise izborom bita jednog od roditelja.
-    novi_kod = []
+    dete1, dete2 = [], []
     for i in range(br_jed):
         if random.random() < 0.5:
-            novi_kod.append(kod1[i])
+            dete1.append(kod1[i])
+            dete2.append(kod2[i])
         else:
-            novi_kod.append(kod2[i])
-    return novi_kod
+            dete1.append(kod2[i])
+            dete2.append(kod1[i])
+    return dete1, dete2
 
 
 def ukrstanje_parova(populacija, parovi, br_jed):  # dvaput ukrsta svaki par da bi populacija dece
@@ -82,8 +89,9 @@ def ukrstanje_parova(populacija, parovi, br_jed):  # dvaput ukrsta svaki par da 
     m = len(populacija[0])
 
     for i in range(br_jed):
-        potomstvo.append(kros_over(populacija[parovi[i][0]], populacija[parovi[i][1]], m))
-        potomstvo.append(kros_over(populacija[parovi[i][0]], populacija[parovi[i][1]], m))
+        deca = kros_over(populacija[parovi[i][0]], populacija[parovi[i][1]], m)
+        potomstvo.append(deca[0])
+        potomstvo.append(deca[1])
     return np.array(potomstvo)
 
 
@@ -115,14 +123,16 @@ def mutacija(populacija, p_mut):  # mutira odredjen procenat bitova u populaciji
     return populacija
 
 
-def genetski_algoritam(populacija, p_elit, p_mut):
+def genetski_algoritam(populacija, pop_elita, p_elit, p_mut):
+    print('pop: ', populacija.shape)
+    populacija, pop_elita = elitizam(populacija, pop_elita, p_elit)
     populacija, fitness = np.split(populacija, [-1], axis=1)
-    populacija = elitizam(populacija, p_elit)
+    print('fit: ', fitness.shape)
     populacija = selekcija(populacija, fitness)
     populacija = ukrstanje(populacija)
     populacija = mutacija(populacija, p_mut)
     # print(populacija.shape)
-    return np.concatenate((populacija, fitness), axis=1)
+    return populacija, pop_elita
 
 
 # if __name__ == "__main__":
