@@ -8,33 +8,36 @@ import math
 # PROMENLJIVE KOJE SE MOGU VARIRATI
 
 fuel_type = "solar"
-dry_mass = 2400
-max_fuel_mass = 600
-max_time_span = 1000
+dry_mass = 1100
+max_fuel_mass = 400
+min_fuel_mass = 0
+max_time_span = 783
 broj_segmenata = 20
-broj_jedinki = 20
+broj_jedinki = 128
 broj_gen = 1
-y_max = 2.5
+y_max = 1.0
 chebdeg = 4
-destination = np.array([4])
+destination = np.array([3])
 
 
 # POMOCNE PROMENLJIVE - NE MENJATI AKO NE ZNAS STA JE (ODNOSI SE NA SVE ISPOD)
 
 # kernel = SPK.open('D:/Downloads/de432s.bsp')
-beg_of_time = datetime.date(2000, 1, 1)  # pocetak vremena
+beg_of_time = datetime.datetime(2000, 1, 1, 0, 0, 0)  # pocetak vremena
 planet_radii = np.array([6.96342e8, 2.4397e6, 6.0518e6, 6.371e6, 3.3895e6, 6.9911e7, 5.8232e7, 2.5362e7, 2.4622e7])
+planet_soi = np.array([0.0, 0.112, 0.616, 0.924, 0.576, 48.2, 54.6, 51.8, 86.8]) * 1e9
+grav_par = [1.327124400189e20, 2.20329e13, 3.248599e14, 3.9860044188e14, 4.2828372e13,  # gravitaconi parametri
+            1.266865349e17, 3.79311879e16, 5.7939399e15, 6.8365299e15, 8.719e11]
 r_parking = 5e5 + planet_radii[3]  # poluprecnik "parking" orbite - u njoj se nalazi brod pre lansiranja
 indeksi = np.array([0, 2, 3, 4, 5, 6, 7])  # planete cija se gravitacija uracunava
 au = 149597870700  # astronomska jedinica u metrima
-grav_par = [1.327124400189e20, 2.20329e13, 3.248599e14, 3.9860044188e14, 4.2828372e13,  # gravitaconi parametri
-            1.266865349e17, 3.79311879e16, 5.7939399e15, 6.8365299e15, 8.719e11]
 trajanje = 0.0
 crashed = False
+soi_index = -1
 
 polozaji_ucitani = False
-beg_date, years_saved = 0, 0
-polozaji_matrica = np.empty((math.floor(10*365.25), 8, 2))
+beg_date, years_saved, step_matrica = 0, 0, 0
+polozaji_matrica = np.empty((math.floor(5*365.25*24), 8, 2))
 
 # podaci potrebni za racunanje pozicije planete po formulama
 
@@ -69,7 +72,7 @@ info = np.array([[0, 0, 0, 0, 0, 0, 0, 0],
 # PODACI O SOLARNOM POGONU
 
 alphaP = 1.0*au
-P0_solar = 1000
+P0_solar = 6000
 r_max = 5 * au
 r_tilt = 0.7 * au
 cm = np.array([475.56e-9, 0.90209e-9, .0, .0, .0])
@@ -79,7 +82,7 @@ beta = np.array([1.0, 0.0, 0.0, 0.0])
 
 psc = 150  # primer vrednosti
 Pmin = 649
-Pmax = 2600
+Pmax = 3500
 
 
 # RTG
@@ -97,13 +100,13 @@ pass
 # rmin = 30  # za sad nasumicne vrednosti
 # pop_size = 150
 # chromosome_len = 600
-p_elit = 0.07
-p_mut = 0.01
+p_elit = 0.10
+p_mut = 0.00
 
 
 # FITNES FUNKCIJA
 
-fitness_min_dist = np.array([6e6])
-fitness_max_dist = np.array([1e8])
-r_maks = np.array([10.0])
-r_min = np.array([20])
+fitness_min_dist = np.array([7e6])
+fitness_max_dist = np.array([60e6])
+r_maks = np.array([3e6])
+r_min = np.array([10e6])

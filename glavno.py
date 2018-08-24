@@ -2,8 +2,10 @@ from numpy.polynomial.chebyshev import chebfit, chebval
 import matplotlib.pyplot as plt
 from math import pi
 import numpy as np
+import time as tm
+import warnings
 
-from podaci import broj_segmenata, broj_jedinki, broj_gen, y_max, dry_mass, max_fuel_mass, max_time_span  # , au
+from podaci import broj_segmenata, broj_jedinki, broj_gen, y_max, max_time_span   , au
 from genetski_algoritam import fitnes
 import genetski_algoritam
 import simulacija_pogon
@@ -15,13 +17,9 @@ import podaci
 # import math
 
 
-def x_osa(a):
-    return np.linspace(0, 1, a)
-
-
 def crtanje_planeta(plot=True):
     broj_tacaka = int(y_max*365*2)
-    broj_planeta = 5
+    broj_planeta = 8
     t = np.linspace(0, y_max*365*24*3600, broj_tacaka)
     x = [[] for _ in range(broj_planeta)]
     y = [[] for _ in range(broj_planeta)]
@@ -47,73 +45,107 @@ def crtanje_planeta(plot=True):
         return x, y
 
 
-def pop_init():
-    rand_days = np.random.random_integers(max_time_span, size=broj_jedinki)
-    # rand_days  = np.array([7])
-    # brod = np.array(([4000.0],[0.0])).T
-    brod = np.array((np.ones(broj_jedinki) * dry_mass,
-                     np.random.random_sample(broj_jedinki) * max_fuel_mass)).T
-    # rand_date = np.empty(broj_jedinki)
-    # for i in range(broj_jedinki):
-    #    rand_date[i] = datetime.date(0, 0, rand_days[i])
-    uglovi_matrica = np.multiply(np.random.random_sample((broj_jedinki, broj_segmenata)), 2 * pi)
-    snaga = np.random.random_integers(0, 1, (broj_jedinki, broj_segmenata))
-    return rand_days, brod, uglovi_matrica, snaga
+def x_osa(a):
+    return np.arange(a)
 
 
-def float_to_bit(days, brod, koeficijenti, snaga, fit):
-    # days = np.empty(broj_jedinki)
-    # for i in range(broj_jedinki):
-    #    days[i] = (date[i] - podaci.beg_of_time).days
-    matrica = np.concatenate((days, brod, koeficijenti, snaga), axis=1)
-    matrica_bit = np.unpackbits(matrica.view(np.uint8), axis=1)
-    return np.concatenate((matrica_bit.T, [fit])).T
+def pop_init(gen=-1):
+    if gen == -1:
+        rand_days = np.random.random_integers(max_time_span, size=broj_jedinki).astype(np.uint16)
+        fuel_mass = np.random.random_integers(0, 255, broj_jedinki).astype(np.uint8)
+        uglovi_matrica = np.multiply(np.random.random_sample((broj_jedinki, broj_segmenata)), 2 * pi)
+        snaga = np.random.random_integers(0, 1, (broj_jedinki, broj_segmenata)).astype(np.uint8)
+        return rand_days, fuel_mass, uglovi_matrica, snaga
+    else:
+        matrica_gena = np.loadtxt('gen_99.txt', dtype=int, usecols=range(364))
+        print(matrica_gena.shape)
+        days, brod, uglovi, snaga = bit_to_float(matrica_gena)
+        return days, brod, uglovi, snaga
+
+
+def float_to_bit(days, fuel_mass, koeficijenti, snaga):
+    len_days = len(days)
+    days_bit = np.unpackbits(days.view(np.uint8).reshape(len_days, 2), axis=1)
+    fuel_bit = np.unpackbits(fuel_mass).reshape(len(fuel_mass), 8)
+    koef_bit = np.unpackbits(koeficijenti.view(np.uint8), axis=1)
+    return np.concatenate((days_bit, fuel_bit, koef_bit, snaga), axis=1)
 
 
 def bit_to_float(matrica_bit):
-    matrica_bit, fitness = np.split(matrica_bit, [-1], axis=1)
-    days_bit, brod_bit, koeficijenti_bit, snaga = np.split(matrica_bit,
-                                                           64*np.array((1, 3, 4+podaci.chebdeg)),
+    days_bit, fuel_bit, koeficijenti_bit, snaga = np.split(matrica_bit,
+                                                           np.array((16, 24, (1+podaci.chebdeg)*64 + 24)),
                                                            axis=1)
-    days = np.packbits(days_bit.astype(bool), axis=1).view(np.float64)
-    # date = np.empty(broj_jedinki)
-    # for i in range(broj_jedinki):
-    #    date[i] = datetime.timedelta(days=days[i]) + podaci.beg_of_time
-    brod = np.packbits(brod_bit.astype(bool), axis=1).view(np.float64)
+    days = np.packbits(days_bit.astype(bool), axis=1).view(np.uint16)
+    brod = np.packbits(fuel_bit.astype(bool), axis=1).view(np.uint8)
     koeficijenti = np.packbits(koeficijenti_bit.astype(bool), axis=1).view(np.float64)
-    uglovi = chebval(x_osa(broj_segmenata), koeficijenti)
-    return days, brod, uglovi, snaga, fitness
+    try:
+        uglovi = chebval(x_osa(broj_segmenata), koeficijenti.T)
+        uglovi = np.mod(uglovi, 2*pi)
+    except RuntimeWarning:
+        uglovi = np.random.random_sample(size=(broj_jedinki, broj_segmenata)) * 2*pi
+    print(days.shape, brod.shape, uglovi.shape, snaga.shape)
+    return days, brod, uglovi, snaga
 
 
-# start = time.process_time()
-def main():
-    days, brod, uglovi, snaga = pop_init()
+def main(plot=False):
+    warnings.filterwarnings('error', category=RuntimeWarning)
+    days, fuel_mass, uglovi, snaga = pop_init(gen=1)
+    print(days.shape)
+    print(fuel_mass.shape)
+    print(uglovi.shape)
+    print(snaga.shape)
     pop_fit = np.empty(broj_jedinki)
     koeficijenti = np.empty((broj_jedinki, podaci.chebdeg + 1))
+    fitness = np.loadtxt('gen_99.txt', dtype=float, usecols=364)
+    ind = np.argmin(fitness)
+    pop_elita = None
+    print('Fitness: ', fitness[ind])
     for i in range(broj_gen):
-        for j in range(broj_jedinki):
-            # print(j)
-            _r, _, _, min_dist_dest = simulacija_pogon.simulacija(days[j], brod[j], uglovi[j], snaga[j], y_max)
+        for j in range(30,40):
+            print(j)
+            print('File fitness: ', fitness[j])
+            print('Launch offset:', days[j])
+            print('Fuel mass:', fuel_mass[j]/255 * podaci.max_fuel_mass)
+            #print('Uglovi:', (uglovi[j]%(2*pi))*360/(2*pi))
+            _r, _, _, min_dist_dest = simulacija_pogon.simulacija(days[j], fuel_mass[j], uglovi[j], snaga[j], y_max)
             # if pop_fit[j] == -1:
             pop_fit[j] = fitnes(min_dist_dest)
             koeficijenti[j] = chebfit(x_osa(broj_segmenata), uglovi[j], podaci.chebdeg)
-            if True:
+            if plot:
                 x, y = crtanje_planeta(plot=False)
-                plt.plot(x[0], y[0], 'g',
-                         x[1], y[1], 'y',
-                         x[2], y[2], 'b--',
-                         x[3], y[3], 'r',
-                         _r[:, 0], _r[:, 1],
-                         linewidth=0.8)
+                plt.plot(np.array(x[2])/au, np.array(y[2])/au, 'b--',
+                         np.array(x[3])/au, np.array(y[3])/au, 'r-.',
+                         _r[:, 0]/au, _r[:, 1]/au,'g:',linewidth=0.9)
                 plt.plot(0.0, 0.0, 'k*', markersize=7)
                 plt.axis('scaled')
-                
+                plt.xlabel('x-osa [astronomska jedinica]')
+                plt.ylabel('y-osa [astronomska jedinica]')
+                plt.title('Flyby Marsa')
                 plt.show()
-        pop_bit = float_to_bit(days[:, np.newaxis], brod, koeficijenti, snaga, pop_fit)
+        # print(podaci.trajanje)
+        # pop_bit = np.array([[0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 15.1],
+        #                    [1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 5.6],
+        #                    [0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 10.8],
+        #                    [1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 2.6],
+        #                    [0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 4.9]])
+        # pop_elita = np.array([[0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1.5]])
+        pop_bit = float_to_bit(days[:, np.newaxis], fuel_mass, koeficijenti, snaga)
         # print(pop_bit)
-        pop_bit_new = genetski_algoritam.genetski_algoritam(pop_bit, podaci.p_elit, podaci.p_mut)
-        date_time, brod, uglovi, snaga, pop_fit = bit_to_float(pop_bit_new)
+        pop_bit_new, pop_elita = genetski_algoritam.genetski_algoritam(pop_bit, pop_elita, podaci.p_elit, podaci.p_mut)
+        # print(pop_bit_new)
+        # print(pop_elita)
+        # date_time, fuel_mass, uglovi, snaga = bit_to_float(pop_bit_new)
         print(np.min(pop_fit))
+
+
+def main1():
+    days, fuel_mass, uglovi, snaga = pop_init()
+    print(days)
+    koeficijenti = chebfit(x_osa(broj_segmenata), uglovi.T, podaci.chebdeg).T
+    # print(uglovi, snaga)
+    pop_bit = float_to_bit(days, fuel_mass, koeficijenti, snaga)
+    days2, fuel_mass2, uglovi2, snaga2 = bit_to_float(pop_bit)
+    print(days2 - days)
 
 
 if __name__ == "__main__":
